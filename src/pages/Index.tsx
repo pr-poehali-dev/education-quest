@@ -460,7 +460,7 @@ const Index = () => {
 
   const handleLocationClick = (locationId: string) => {
     const location = locations.find(l => l.id === locationId);
-    if (location?.status === 'available') {
+    if (location?.status === 'available' || location?.status === 'current') {
       playSound();
       const updatedLocations = locations.map(loc => {
         if (loc.id === locationId) return { ...loc, status: 'current' as LocationStatus };
@@ -603,11 +603,11 @@ const Index = () => {
                 <button
                   key={location.id}
                   onClick={() => handleLocationClick(location.id)}
-                  disabled={location.status === 'locked' || location.status === 'completed' || location.status === 'current'}
+                  disabled={location.status === 'locked' || location.status === 'completed'}
                   className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border-4 
                     flex items-center justify-center transition-all duration-300 shadow-lg
                     ${getLocationColor(location.status)}
-                    ${location.status === 'available' ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                    ${(location.status === 'available' || location.status === 'current') ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                   style={{ left: `${location.x}%`, top: `${location.y}%` }}
                 >
                   <Icon name="Flag" size={28} />
