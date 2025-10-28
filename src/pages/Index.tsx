@@ -430,6 +430,12 @@ const Index = () => {
 
   const [locations, setLocations] = useState<Location[]>(initLocations());
 
+  const playSound = () => {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWm98OScTgwPUKnk77hkHQc5k9nyzngqBSF1xu/+');
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+  };
+
   const handleAnswer = (nextId: string) => {
     if (nextId.startsWith('final-')) {
       setFinalType(nextId);
@@ -437,17 +443,13 @@ const Index = () => {
       return;
     }
 
+    playSound();
     setVisitedLocations([...visitedLocations, currentQuestion]);
     setCurrentQuestion(nextId);
 
     const updatedLocations = locations.map(loc => {
       if (loc.id === currentQuestion) return { ...loc, status: 'completed' as LocationStatus };
-      if (loc.id === nextId) return { ...loc, status: 'current' as LocationStatus };
-      
-      const currentLoc = locations.find(l => l.id === currentQuestion);
-      if (currentLoc?.connections.includes(loc.id)) {
-        return { ...loc, status: 'available' as LocationStatus };
-      }
+      if (loc.id === nextId) return { ...loc, status: 'available' as LocationStatus };
       return loc;
     });
 
@@ -458,7 +460,13 @@ const Index = () => {
 
   const handleLocationClick = (locationId: string) => {
     const location = locations.find(l => l.id === locationId);
-    if (location?.status === 'available' || location?.status === 'current') {
+    if (location?.status === 'available') {
+      playSound();
+      const updatedLocations = locations.map(loc => {
+        if (loc.id === locationId) return { ...loc, status: 'current' as LocationStatus };
+        return loc;
+      });
+      setLocations(updatedLocations);
       setCurrentQuestion(locationId);
       setGameState('question');
     }
@@ -474,10 +482,10 @@ const Index = () => {
 
   const getLocationColor = (status: LocationStatus) => {
     switch (status) {
-      case 'current': return 'bg-destructive border-destructive animate-pulse-glow';
-      case 'completed': return 'bg-muted border-muted opacity-50';
-      case 'available': return 'bg-accent border-accent hover:scale-110';
-      default: return 'bg-gray-300 border-gray-300 opacity-30';
+      case 'current': return 'bg-destructive border-destructive animate-pulse-glow text-white';
+      case 'completed': return 'bg-gray-400 border-gray-400 opacity-50 text-white';
+      case 'available': return 'bg-accent border-accent hover:scale-110 text-white';
+      default: return 'bg-gray-300 border-gray-300 opacity-30 text-gray-500';
     }
   };
 
@@ -562,7 +570,7 @@ const Index = () => {
               <p className="text-lg text-muted-foreground">Выберите локацию для продолжения путешествия</p>
             </div>
 
-            <div className="relative w-full h-[600px] bg-gradient-to-b from-accent/10 to-primary/10 rounded-2xl border-4 border-primary/20 overflow-hidden">
+            <div className="relative w-full h-[600px] bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 rounded-2xl border-4 border-primary/20 overflow-hidden shadow-inner">
               <svg className="absolute inset-0 w-full h-full">
                 {locations.map(loc => {
                   const connectedLocs = locations.filter(l => loc.connections.includes(l.id));
@@ -586,14 +594,14 @@ const Index = () => {
                 <button
                   key={location.id}
                   onClick={() => handleLocationClick(location.id)}
-                  disabled={location.status === 'locked' || location.status === 'completed'}
-                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full border-4 
-                    flex items-center justify-center font-bold text-white transition-all duration-300 shadow-lg
+                  disabled={location.status === 'locked' || location.status === 'completed' || location.status === 'current'}
+                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border-4 
+                    flex items-center justify-center transition-all duration-300 shadow-lg
                     ${getLocationColor(location.status)}
-                    ${(location.status === 'available' || location.status === 'current') ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                    ${location.status === 'available' ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                   style={{ left: `${location.x}%`, top: `${location.y}%` }}
                 >
-                  <span className="text-xs text-center px-1">{location.name}</span>
+                  <Icon name="Flag" size={28} />
                 </button>
               ))}
             </div>
@@ -607,9 +615,9 @@ const Index = () => {
                 <div className="w-4 h-4 rounded-full bg-accent"></div>
                 <span className="text-sm font-medium">Доступна</span>
               </div>
-              <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-lg">
-                <div className="w-4 h-4 rounded-full bg-muted border-2"></div>
-                <span className="text-sm font-medium">Пройдена</span>
+              <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg">
+                <div className="w-4 h-4 rounded-full bg-gray-300 border-2"></div>
+                <span className="text-sm font-medium">Недоступна</span>
               </div>
             </div>
           </Card>
@@ -633,9 +641,9 @@ const Index = () => {
                 <h2 className="text-4xl font-bold text-primary mb-2">{questionData.pedagogue}</h2>
               </div>
 
-              <div className="relative bg-white p-8 rounded-3xl border-4 border-primary shadow-xl">
-                <div className="absolute -top-4 left-8 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[20px] border-b-primary"></div>
-                <p className="text-2xl leading-relaxed text-center italic">{questionData.dialogue}</p>
+              <div className="relative bg-gradient-to-br from-yellow-100 via-orange-50 to-yellow-100 p-8 rounded-3xl border-4 border-orange-400 shadow-xl">
+                <div className="absolute -top-4 left-8 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[20px] border-b-orange-400"></div>
+                <p className="text-2xl leading-relaxed text-center italic font-semibold text-gray-800">{questionData.dialogue}</p>
               </div>
 
               <Button 
