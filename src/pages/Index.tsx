@@ -482,10 +482,10 @@ const Index = () => {
 
   const getLocationColor = (status: LocationStatus) => {
     switch (status) {
-      case 'current': return 'bg-destructive border-destructive animate-pulse-glow text-white';
-      case 'completed': return 'bg-gray-400 border-gray-400 opacity-50 text-white';
-      case 'available': return 'bg-accent border-accent hover:scale-110 text-white';
-      default: return 'bg-gray-300 border-gray-300 opacity-30 text-gray-500';
+      case 'current': return 'bg-red-500 border-red-600 animate-pulse-glow text-white shadow-red-500/50';
+      case 'completed': return 'bg-green-500 border-green-600 text-white shadow-green-500/30';
+      case 'available': return 'bg-blue-500 border-blue-600 hover:scale-110 text-white shadow-blue-500/50 cursor-pointer';
+      default: return 'bg-gray-400 border-gray-500 opacity-40 text-gray-300';
     }
   };
 
@@ -537,8 +537,12 @@ const Index = () => {
                   <span>Голубая локация - доступна для перехода</span>
                 </li>
                 <li className="flex items-start gap-3">
+                  <span className="text-2xl">🟢</span>
+                  <span>Зелёная локация - уже пройдена</span>
+                </li>
+                <li className="flex items-start gap-3">
                   <span className="text-2xl">⚪</span>
-                  <span>Серая локация - уже пройдена</span>
+                  <span>Серая локация - недоступна</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-2xl">✨</span>
@@ -570,7 +574,12 @@ const Index = () => {
               <p className="text-lg text-muted-foreground">Выберите локацию для продолжения путешествия</p>
             </div>
 
-            <div className="relative w-full h-[600px] bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 rounded-2xl border-4 border-primary/20 overflow-hidden shadow-inner">
+            <div 
+              className="relative w-full h-[600px] rounded-2xl border-4 border-primary/20 overflow-hidden shadow-inner" 
+              style={{ 
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #E0F2FE 0%, #DDD6FE 50%, #FCE7F3 100%)' 
+              }}
+            >
               <svg className="absolute inset-0 w-full h-full">
                 {locations.map(loc => {
                   const connectedLocs = locations.filter(l => loc.connections.includes(l.id));
@@ -607,16 +616,20 @@ const Index = () => {
             </div>
 
             <div className="mt-6 flex gap-4 justify-center flex-wrap">
-              <div className="flex items-center gap-2 bg-destructive/10 px-4 py-2 rounded-lg">
-                <div className="w-4 h-4 rounded-full bg-destructive"></div>
+              <div className="flex items-center gap-2 bg-red-100 px-4 py-2 rounded-lg border border-red-300">
+                <div className="w-4 h-4 rounded-full bg-red-500"></div>
                 <span className="text-sm font-medium">Текущая</span>
               </div>
-              <div className="flex items-center gap-2 bg-accent/10 px-4 py-2 rounded-lg">
-                <div className="w-4 h-4 rounded-full bg-accent"></div>
+              <div className="flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-lg border border-blue-300">
+                <div className="w-4 h-4 rounded-full bg-blue-500"></div>
                 <span className="text-sm font-medium">Доступна</span>
               </div>
-              <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg">
-                <div className="w-4 h-4 rounded-full bg-gray-300 border-2"></div>
+              <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-lg border border-green-300">
+                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                <span className="text-sm font-medium">Пройдена</span>
+              </div>
+              <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
+                <div className="w-4 h-4 rounded-full bg-gray-400"></div>
                 <span className="text-sm font-medium">Недоступна</span>
               </div>
             </div>
